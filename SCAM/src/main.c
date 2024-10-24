@@ -1,33 +1,21 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
+#include "buzzer.h"
 
-#define DIGITAL13 0b00100000
-
-void init(void)
-{
-    DDRB |= DIGITAL13;// Digital 13 "outputmode"
-}
-
-void led_on(){
-    PORTB |= DIGITAL13;
-}
-
-void led_off(){
-    PORTB &= ~DIGITAL13;
-}
-
-#define TIME_UNIT 120
+#define TIME_UNIT 1000
 
 int main(void)
 {
-    init();
+    tone_attach(DDRB, PORTB, PORTB5);
+    sei();
 
     while(1) //infinite loop
     {
-        led_on();
-        _delay_ms(TIME_UNIT);
-        led_off();
-        _delay_ms(TIME_UNIT);
+        tone_set(400, 1000);
+        tone_start();
+
+        _delay_ms(3000);
     }
 
     return 0;
