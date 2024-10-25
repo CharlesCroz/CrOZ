@@ -1,12 +1,10 @@
 ##################
 # general options
-
 export CC = avr-gcc
 export MCU = atmega328p
 export TARGET_ARCH = -mmcu=$(MCU)
 
 TARGET = SCAM
-
 
 #######################
 # Setting up tool paths
@@ -15,16 +13,8 @@ STTY_OPT = -F
 AVRDUDE_PATH = /usr/bin/
 AVRDUDECONF_PATH = /usr/share/arduino/hardware/tools/
 
-####################
-# ARDUINO libs setup
-# ARDUINO_H = $(ARDUINO_HW_ROOT)/cores/arduino
-# ARDUINO_STD = $(ARDUINO_HW_ROOT)/variants/standard
-
-
 ###########################
 # compiler and linker flags
-export CFLAGS = -mmcu=$(MCU) -Wall -I. -I$(ARDUINO_H) -I$(ARDUINO_STD) -DF_CPU=16000000 -Os
-# export LDFLAGS = -g $(TARGET_ARCH) -lm -Wl,--gc-sections
 export LDFLAGS = -g $(TARGET_ARCH) -nostdlib
 
 
@@ -37,25 +27,14 @@ export DUDE = $(AVRDUDE_PATH)/avrdude -F -v -p $(MCU) $(AVRDUDECONF)
 
 
 ### OBJS
-SRC := src
-OBJ := obj
-_dummy := $(shell mkdir -p $(OBJ))
-# C_SRCS := $(wildcard $(SRC)/*.c)
-C_SRCS := src/blink_timer0.S
-# C_SRCS := src/blink_simple.s
-C_OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(C_SRCS))
-TARGET := $(OBJ)/$(TARGET)
+SRC_CODES := blink_simple.S
 
 
+### RULES
 all: $(TARGET).hex
 
-$(OBJ)/%.o:$(SRC)/%.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
-
-$(TARGET).elf: $(C_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(C_OBJS)
-
-$(TARGET).hex: $(TARGET).elf
+$(TARGET).hex: $(SRC_CODES)
+	$(CC) $(LDFLAGS) -o $(TARGET).elf $(SRC_CODES)
 	avr-objcopy -j .text -j .data -O ihex $(TARGET).elf $(TARGET).hex
 
 upload: $(TARGET).hex
@@ -65,5 +44,8 @@ upload: $(TARGET).hex
 size: $(TARGET).elf
 	avr-size --format=avr --mcu=$(MCU) $(TARGET).elf
 
+peek: $(TARGET).elf
+	avr-objdump -D -s $(TARGET).elf -j .text
+
 clean:
-	rm -f **/*.o *~ **/*.hex **/*.elf
+	rm -f *.hex *.elf

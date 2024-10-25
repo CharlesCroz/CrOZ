@@ -7,9 +7,7 @@
 
 int main(void)
 {
-    tone_attach(DDRB, PORTB, PORTB5);
-    sei();
-
+    tone_attach();
     while(1) //infinite loop
     {
         tone_set(400, 1000);

@@ -6,14 +6,18 @@
 
 #define _TONE_CLI()                     \
     asm volatile (                      \
+		"push	r0				\n\t"   \
 		"in		r0, __SREG__	\n\t"   \
 		"cli					\n\t"   \
-		"push	r0				\n\t");
+		"push	r0				\n\t"   \
+    );
 
 #define _TONE_CLI_INV()                 \
     asm volatile (                      \
 		"pop	r0				\n\t"   \
-		"out 	__SREG__, r0	\n\t");
+		"out 	__SREG__, r0	\n\t"   \
+		"pop	r0				\n\t"   \
+    );
 
 
 volatile uint8_t _tone_port;
@@ -22,14 +26,12 @@ volatile uint16_t _tone_changes_count;
 
 void tone_start();
 void tone_stop();
-void tone_attach(uint8_t bank, uint8_t port, uint8_t pin);
+void tone_attach();
 uint8_t tone_set(uint16_t freq, uint16_t time_millis);
 void _tone_switch();
 
-void tone_attach(uint8_t bank, uint8_t port, uint8_t pin){
-    bank |= (1 << pin);
-    _tone_port = port;
-    _tone_pin = pin;
+void tone_attach(){
+    DDRB |= (1 << PORTB5);
 }
 
 uint8_t tone_set(uint16_t freq, uint16_t time_millis){
@@ -90,6 +92,7 @@ void tone_start(){
     
     /* Set interrupt */
     TIMSK0 |= (1 << OCIE0A);
+    sei();
 }
 
 void tone_stop(){
@@ -103,7 +106,7 @@ void _tone_switch(){
     
     if(!_tone_changes_count)
         tone_stop();
-    _tone_port ^= (1 << _tone_pin);
+    PORTB ^= (1 << PORTB5);
     _tone_changes_count--;
 
     _TONE_CLI_INV()
