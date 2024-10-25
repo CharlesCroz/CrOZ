@@ -17,6 +17,7 @@
 .equ    TIMSK0 , 0x6E   ;
 .equ    TIFR0 , 0x15    ;
 .equ    TOV0 , 0        ;
+.equ    OCF0A , 1       ;
 ;   SLEEP
 .equ    SMCR , 0x33     ;
 
@@ -25,7 +26,6 @@
 .org 0x0038                 ; 
     jmp TIM0_COMPA          ; goto TIM0_COMPA
 
-.org 0x0068
 reset:
     eor     r1, r1
     out     0x3f, r1        ; 63
@@ -39,9 +39,6 @@ reset:
     sei                     ;   Enable interrupts
 main:
     rjmp    main            ;
-    ; ldi     r16 , 0b1101    ;
-    ; out     SMCR , r16      ;
-    ; sleep                   ;   Sleep
 
 set_timer:
     ldi     r16 , 0b00000010;   Deal with TCCR0A
@@ -52,18 +49,23 @@ set_timer:
     out     TCNT0 , r16     ;
     ldi     r16 , 0xFF      ;   Deal with OCR0A
     out     OCR0A , r16     ;
-    ldi     r16 , 0b00000011;   Deal with TIMSK0
+    ldi     r16 , 0b00000010;   Deal with TIMSK0
     sts     TIMSK0, r16     ;
+    ldi     r18 , 20        ;   prescaler2
     ret
 
 TIM0_COMPA:
-    sbi     TIFR0, TOV0     ;
-    sbis    PORTB, PORTB5   ;
-    breq    turn_on         ;
-    cbi     PORTB, PORTB5   ;
-    reti                    ;
+    dec r18                 ;   Decrease prescaler2
+    breq switch_led         ;   If zero, reset and swtich LED
+    reti                    ;   Else, return from interrupt
+switch_led:
+    ldi     r18, 10         ;   Reset prescaler2
+    sbis    PORTB, PORTB5   ;   Check LED status
+    rjmp    turn_on         ;   If not set, go to turn on
+    cbi     PORTB, PORTB5   ;   If set, turn off
+    reti                    ;   Return from interrupt 
 turn_on:
-    sbi     PORTB, PORTB5   ;
-    reti                    ;
+    sbi     PORTB, PORTB5   ;   And turn on
+    reti                    ;   Return from interrupt
 
 

@@ -7,16 +7,13 @@
 .equ    PORTB , 0x05    ; 
 .equ    PORTB5 , 5      ; 
 ;   TIMER0
-.equ    TCCR_A , 0x24   ; 
-.equ    TCCR_B , 0x25   ; 
-.equ    TCNT_ , 0x26    ;
-.equ    OCR_A , 0x27    ;
+.equ    TCCR0A , 0x24   ; 
+.equ    TCCR0B , 0x25   ; 
+.equ    TCNT0 , 0x26    ;
+.equ    OCR0A , 0x27    ;
 ;   Enable Interrupts
-.equ    TIFR_ , 0x15    ;
-.equ    TOV0 , 0        ;
-.equ    OCF_A , 1       ;
-;   SLEEP
-.equ    SMCR , 0x33     ;
+.equ    TIFR0 , 0x15    ;
+.equ    OCF0A , 1       ;
 
 .org 0x0000                 ; changes interrupt vector table
     jmp reset               ; 
@@ -24,17 +21,17 @@
 reset:
 ;   Program requirements
     sbi     DDRB , PORTB5   ;   PIN13 OUT
-    ldi     r16 , 0b00000010;   Deal with TCCR_A
-    out     TCCR_A , r16    ;
-    ldi     r16 , 0b00000101;   Deal with TCCR_B
-    out     TCCR_B , r16    ;
-    ldi     r16 , 0xFF      ;   Deal with OCR_A
-    out     OCR_A , r16     ;
-    ldi     r18, 10         ;   N times counter
+    ldi     r16 , 0b00000010;   Deal with TCCR0A
+    out     TCCR0A , r16    ;
+    ldi     r16 , 0b00000101;   Deal with TCCR0B
+    out     TCCR0B , r16    ;
+    ldi     r16 , 0xFF      ;   Deal with OCR0A
+    out     OCR0A , r16     ;
+    ldi     r18, 10         ;   Prescale again
 main:
-    sbis    TIFR_, OCF_A    ;   Check COMPA flag
+    sbis    TIFR0, OCF0A    ;   Check COMPA flag
     rjmp    main            ;   If clear, jump back and check again
-    sbi     TIFR_, OCF_A    ;   If set, clear bit
+    sbi     TIFR0, OCF0A    ;   If set, clear bit
     dec     r18             ;   r18--
     brne    main            ;   If not 0, wait for one more COMPA
     ldi     r18, 10         ;   If 0, reset r18, and szitch LED
