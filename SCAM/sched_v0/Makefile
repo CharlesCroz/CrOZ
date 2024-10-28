@@ -7,26 +7,16 @@ export TARGET_ARCH = -mmcu=$(MCU)
 
 TARGET = SCAM
 
-
 #######################
 # Setting up tool paths
 TERM = /dev/ttyUSB0
 STTY_OPT = -F
 AVRDUDE_PATH = /usr/bin/
-AVRDUDECONF_PATH = /usr/share/arduino/hardware/tools/
-
-####################
-# ARDUINO libs setup
-# ARDUINO_H = $(ARDUINO_HW_ROOT)/cores/arduino
-# ARDUINO_STD = $(ARDUINO_HW_ROOT)/variants/standard
-
 
 ###########################
 # compiler and linker flags
-export CFLAGS = -mmcu=$(MCU) -Wall -I. -I$(ARDUINO_H) -I$(ARDUINO_STD) -DF_CPU=16000000 -Os
-# export LDFLAGS = -g $(TARGET_ARCH) -lm -Wl,--gc-sections
-export LDFLAGS = -g $(TARGET_ARCH) -nostdlib
-
+export CFLAGS = -mmcu=$(MCU) -Wall -I. -DF_CPU=16000000 -Os
+export LDFLAGS = -g $(TARGET_ARCH) -lm -Wl,--gc-sections
 
 #################
 # AVRDUDE options
@@ -40,9 +30,7 @@ export DUDE = $(AVRDUDE_PATH)/avrdude -F -v -p $(MCU) $(AVRDUDECONF)
 SRC := src
 OBJ := obj
 _dummy := $(shell mkdir -p $(OBJ))
-# C_SRCS := $(wildcard $(SRC)/*.c)
-C_SRCS := src/blink_timer0.S
-# C_SRCS := src/blink_simple.s
+C_SRCS := $(wildcard $(SRC)/*.c)
 C_OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(C_SRCS))
 TARGET := $(OBJ)/$(TARGET)
 
