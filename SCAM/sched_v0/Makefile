@@ -31,6 +31,7 @@ SRC := src
 OBJ := obj
 _dummy := $(shell mkdir -p $(OBJ))
 C_SRCS := $(wildcard $(SRC)/*.c)
+C_HDRS := $(wildcard $(SRC)/*.h)
 C_OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(C_SRCS))
 TARGET := $(OBJ)/$(TARGET)
 

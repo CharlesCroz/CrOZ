@@ -11,7 +11,12 @@ void led_red(void){
 
     while(1){
         PORTB ^= (1 << PORTB5);
-        _delay_ms(250);
+        uint16_t k = -1;
+        while(--k){
+            uint8_t l = 20;
+            while(--l)
+                ;
+        }
     }
 }
 
@@ -20,7 +25,12 @@ void led_green(void){
 
     while(1){
         PORTB ^= (1 << PORTB4);
-        _delay_ms(500);
+        uint16_t k = -1;
+        while(--k){
+            uint8_t l = 40;
+            while(--l)
+                ;
+        }
     }
 }
 
@@ -39,13 +49,13 @@ int main(void)
         },
         {
             .status = STATUS_INIT,
-            .func = &led_red,
+            .func = &led_green,
             .ms = 20,
             .heap_addr = 0x700,
         },
         {
             .status = STATUS_INIT,
-            .func = &led_green,
+            .func = &led_red,
             .ms = 20,
             .heap_addr = 0x600,
         }

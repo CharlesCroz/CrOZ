@@ -1,8 +1,6 @@
+#ifndef __SCAM_SCHEDULER
+#define __SCAM_SCHEDULER
 
-#ifndef SCAM_BUZZER
-#define SCAM_BUZZER
-
-#include <avr/io.h>
 #include <stdint.h>
 
 #define STATUS_OFF 0
@@ -20,4 +18,4 @@ struct running_process {
 void start_scheduler(volatile struct running_process processes[], uint8_t count);
 
 
-#endif // SCAM_BUZZER
+#endif // __SCAM_SCHEDULER

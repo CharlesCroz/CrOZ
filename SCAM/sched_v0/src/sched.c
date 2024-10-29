@@ -87,22 +87,22 @@
 volatile uint8_t __sched_current = 0;
 volatile struct running_process *__sched_procs = (void *)0;
 uint8_t __sched_count = 0;
+volatile uint16_t ms_counter = 0;
 
 /* Handler */
-ISR(TIMER2_COMPA_vect){
-    static uint16_t ms_counter = 0;
-
+ISR(TIMER2_COMPA_vect, ISR_NAKED){
     /* Stop current */
     __SCHED_SAVE_CONTEXT()
     __sched_procs[__sched_current].heap_addr = SP;
 
-    /* increment ms counter if != 20, wait. If == 20, reset and handle */
-    if(++ms_counter != __sched_procs[__sched_current].ms)
-        __SCHED_RESTORE_CONTEXT()
-    ms_counter = 0;
+	/* Witness */
+	PORTB ^= (1 << PORT3);
+	
 
-    /* Stop interruptions */
-    cli();
+    /* If it is too early to stop process, resume. */
+    if(++ms_counter < __sched_procs[__sched_current].ms)
+        goto restore;
+    ms_counter = 0;
     
     /* Find next process to schedule (simple Round Robin) */
     uint8_t next_proc = __sched_current;
@@ -120,14 +120,18 @@ ISR(TIMER2_COMPA_vect){
     switch (__sched_procs[__sched_current].status)
     {
     case STATUS_RUNNING:
-        __SCHED_RESTORE_CONTEXT()
-        return;
+		goto restore;
     case STATUS_INIT:
     default:
-        cli();
         __sched_procs[__sched_current].status = STATUS_RUNNING;
         __sched_procs[__sched_current].func();
+		sei();
+		reti();
     }
+restore:
+	__SCHED_RESTORE_CONTEXT()
+	sei();
+	reti();
 }
 
 void start_scheduler(volatile struct running_process processes[], uint8_t count){
@@ -136,6 +140,9 @@ void start_scheduler(volatile struct running_process processes[], uint8_t count)
     __sched_procs = processes;
     __sched_count = count;
     __sched_current = 0;
+
+	/* Witness */
+	DDRB |= (1 << PORTB3);
 
     /* Configure Timer 2 */
     /* Prescaler 128, f_CPU = 16MHz */
@@ -147,11 +154,9 @@ void start_scheduler(volatile struct running_process processes[], uint8_t count)
     OCR2A  = 125;
     TIMSK2 = 0b00000010;
 
-    /* Start interrupts */
-    sei();
-
-    /* Start process 0 */
+    /* Start process 0 and interrupts */
     __sched_procs[0].status = STATUS_RUNNING;
     SP = __sched_procs[0].heap_addr;
+    sei();
     __sched_procs[0].func();
 }
