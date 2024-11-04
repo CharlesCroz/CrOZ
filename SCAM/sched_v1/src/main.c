@@ -7,15 +7,15 @@
 #include "sched.h"
 #include "millis.h"
 
-#define RED_FREQ_HZ 5
-#define GREEN_FREQ_HZ 3
+#define RED_FREQ_HZ 2
+#define GREEN_FREQ_HZ 50
 
 void led_red(void){
     DDRB |= (1 << PORTB5);
-    uint16_t last_tick = 0;
+    uint32_t last_tick = 0;
 
     while(1){
-        uint16_t tick = get_millis();
+        uint32_t tick = get_millis();
         if(tick >= last_tick + (500 / RED_FREQ_HZ)){
             last_tick += (500 / RED_FREQ_HZ);
             PORTB ^= (1 << PORTB5);
@@ -25,10 +25,10 @@ void led_red(void){
 
 void led_green(void){
     DDRB |= (1 << PORTB4);
-    uint16_t last_tick = 0;
+    uint32_t last_tick = get_millis();
 
     while(1){
-        uint16_t tick = get_millis();
+        uint32_t tick = get_millis();
         if(tick >= last_tick + (500 / GREEN_FREQ_HZ)){
             last_tick += (500 / GREEN_FREQ_HZ);
             PORTB ^= (1 << PORTB4);
@@ -46,27 +46,26 @@ int main(void)
         {
             .status = STATUS_INIT,
             .func = &idle_proc,
-            .ms = 1,
+            .ms = 0,
             .stack_pointer = 0x700,
         },
         {
-            .status = STATUS_OFF,
+            .status = STATUS_INIT,
             .func = &led_green,
-            .ms = 20,
+            .ms = 1,
             .stack_pointer = 0x500,
         },
         {
             .status = STATUS_INIT,
             .func = &led_red,
-            .ms = 250,
+            .ms = 1,
             .stack_pointer = 0x600,
         }
     };
     const uint8_t processes_count = sizeof(processes)/sizeof(processes[0]);
     
     start_millis();
-    // start_scheduler(processes, processes_count);
-    led_red();
+    start_scheduler(processes, processes_count);
 
     while(1) //infinite loop
         ;

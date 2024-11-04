@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/**/inc/",
                 "/usr/lib/avr/include/**"
             ],
             "defines": [],

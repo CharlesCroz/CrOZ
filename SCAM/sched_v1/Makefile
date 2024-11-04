@@ -7,15 +7,24 @@ export TARGET_ARCH = -mmcu=$(MCU)
 
 TARGET = SCAM
 
-#######################
 # Setting up tool paths
 TERM = /dev/ttyUSB0
 STTY_OPT = -F
 AVRDUDE_PATH = /usr/bin/
 
 ###########################
+### OBJS
+SRC := ./src
+OBJ := ./obj
+INC := ./inc
+_dummy := $(shell mkdir -p $(OBJ))
+C_SRCS := $(wildcard $(SRC)/*.c)
+C_HDRS := $(wildcard $(INC)/*.h)
+C_OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(C_SRCS))
+TARGET := $(OBJ)/$(TARGET)
+
 # compiler and linker flags
-export CFLAGS = -mmcu=$(MCU) -Wall -I. -DF_CPU=16000000 -Os
+export CFLAGS = -mmcu=$(MCU) -I$(INC) -Wall -DF_CPU=16000000 -Os
 export LDFLAGS = -g $(TARGET_ARCH) -lm -Wl,--gc-sections
 
 #################
@@ -26,14 +35,6 @@ ARVDUDECONF= -C $(AVRDUDECONF_LOC)/avrdude.conf
 export DUDE = $(AVRDUDE_PATH)/avrdude -F -v -p $(MCU) $(AVRDUDECONF)
 
 
-### OBJS
-SRC := src
-OBJ := obj
-_dummy := $(shell mkdir -p $(OBJ))
-C_SRCS := $(wildcard $(SRC)/*.c)
-C_HDRS := $(wildcard $(SRC)/*.h)
-C_OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(C_SRCS))
-TARGET := $(OBJ)/$(TARGET)
 
 
 all: $(TARGET).hex

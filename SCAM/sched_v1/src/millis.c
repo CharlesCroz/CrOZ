@@ -6,18 +6,21 @@
 #include <avr/interrupt.h>
 #include "sched.h"
 
-/* Global (shush) variables for processes handling in interrupts*/
-volatile uint16_t __sched_millis = 0;
+/* Global variable for time keeping */
+volatile uint32_t __sched_millis = 0;
 
 /* Handler */
-ISR(TIMER0_COMPA_vect, ISR_NAKED){
-    /* Stop current */
+ISR(TIMER0_COMPA_vect){
+    /* Upgrade counter */
     ++__sched_millis;
-	reti();
 }
 
-uint16_t get_millis(){
-	return __sched_millis;
+volatile uint32_t get_millis(){
+	uint32_t res;
+    cli();
+    res = __sched_millis;
+    sei();
+    return res;
 }
 
 void start_millis(){
@@ -26,7 +29,7 @@ void start_millis(){
     /* Configure Timer 0 */
     /* Prescaler 64, f_CPU = 16MHz */
     /* TCNT LSB = 1/250 ms */
-    /* OCR0A == 125 <=> Interruption toutes les ms */
+    /* OCR0A == 250 <=> Interruption toutes les ms */
     TCCR0A = 0b00000010;
     TCCR0B = 0b00000011;
     TCNT0  = 0;

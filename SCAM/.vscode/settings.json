@@ -4,6 +4,7 @@
         "io.h": "c",
         "iom328p.h": "c",
         "buzzer.h": "c",
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "sched.h": "c"
     }
 }

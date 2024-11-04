@@ -5,6 +5,6 @@
 
 void start_millis();
 
-uint16_t get_millis();
+volatile uint32_t get_millis();
 
 #endif // __SCAM_MILLIS
