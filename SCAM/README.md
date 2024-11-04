@@ -36,6 +36,6 @@ Some preliminary work about Arduino ASM, registers, timers, and compiler options
 ### Sched
 
 Incremental implementations of a scheduler :
-- **v0** : switch between processes. Saves and restores context.
-- **v1** : Add global timer.
-- **v1** : Add global timer.
+- **v0** : Switches between processes. Saves and restores context.
+- **v1** : Adds a global timer.
+- **v2** : Adds a buzzer.
